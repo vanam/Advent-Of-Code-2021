@@ -8,7 +8,7 @@ https://adventofcode.com/2021
 3. Binary tree traversal (unnecessary optimization)
 4. Game simulation
 5. Sweep line
-6. Neat simulation
+6. Neat simulation / Matrix exponentiation
 7. Ternary search
 8. Frequency table
 9. Flood fill
