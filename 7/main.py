@@ -28,10 +28,12 @@ with open(FILE) as file:
 
     # 1. part - find minimum of fuel function
 
-    from statistics import median
+    from statistics import median, mean
     # rouding behaves rather strangely https://realpython.com/python-rounding/ but it should not make a difference
-    fm = round(median(A))
-    print(fm)
+    fmedian = round(median(A))
+    print(fmedian, fuel(A, fmedian), fuel2(A, fmedian))
+    fmean = round(mean(A))
+    print(fmean, fuel(A, fmean), fuel2(A, fmean))
 
     # 2. part - find minimum of more complicated fuel function (but still unimodal)
     for f in [fuel, fuel2]:  # Use both fuel functions
@@ -50,5 +52,11 @@ with open(FILE) as file:
 
         print("Minimum at %d: %d" % (left, f(A, left)))
 
+    # 2. part - using mean
+    from math import floor, ceil
+    fmean = mean(A)
+    fmean_floor = floor(fmean)
+    fmean_ceil = ceil(fmean)
 
-
+    # Select minimum from candidates
+    print(min(fuel2(A, fmean_floor), fuel2(A, fmean_ceil)))
