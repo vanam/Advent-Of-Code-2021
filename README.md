@@ -9,10 +9,10 @@ https://adventofcode.com/2021
 4. Game simulation
 5. Sweep line
 6. Neat simulation / Matrix exponentiation
-7. Ternary search
+7. Ternary search / Median & mean
 8. Frequency table
 9. Flood fill
-10. 
+10. Balanced brackets
 11. 
 12. 
 13. 
