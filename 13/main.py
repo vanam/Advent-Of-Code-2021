@@ -3,9 +3,6 @@
 FILE = 'input.txt'
 # FILE = 'input-small.txt'
 
-START = 'start'
-END = 'end'
-
 with open(FILE) as f:
     # read dots
     dots = set()
@@ -23,48 +20,37 @@ with open(FILE) as f:
     while True:
         line = f.readline().strip()
 
-        if line.strip() == '':
+        if line == '':
             break
 
         instruction_count += 1
-        fold, pos = line[11:].split('=')
-        pos = int(pos)
+        fold, fold_position = line[11:].split('=')
+        fold_position = int(fold_position)
 
+        new_dots = set()
         if fold == 'x':
-            new_dots = set()
             for x, y in dots:
-                if x < pos:
+                if x < fold_position:
                     new_dots.add((x, y))
                 else:
-                    new_dots.add((x - 2 * (x - pos), y))
-
-            dots = new_dots
+                    new_dots.add((x - 2 * (x - fold_position), y))
         elif fold == 'y':
-            new_dots = set()
             for x, y in dots:
-                if y < pos:
+                if y < fold_position:
                     new_dots.add((x, y))
                 else:
-                    new_dots.add((x, y - 2 * (y - pos)))
+                    new_dots.add((x, y - 2 * (y - fold_position)))
 
-            dots = new_dots
-        else:
-            assert False  # should not happen
+        dots = new_dots
 
         if instruction_count == 1:
             print(len(dots))  # 1. part
 
-    # visualize 2. part and read it
+    # visualize 2. part
     for i in range(10):
         for j in range(50):
             if (j, i) in dots:
-                print('#', end='')
+                print('█', end='')
             else:
-                print('.', end='')
+                print('░', end='')
         print("")
-
-
-
-
-
-
