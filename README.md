@@ -13,9 +13,9 @@ https://adventofcode.com/2021
 8. Frequency table
 9. Flood fill
 10. Balanced brackets
-11. 
-12. 
-13. 
+11. Simulation
+12. Graph traversal (BFS/DFS)
+13. Simulation + visualization
 14. 
 15. 
 16. 
