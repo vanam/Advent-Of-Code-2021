@@ -16,7 +16,7 @@ https://adventofcode.com/2021
 11. Simulation
 12. Graph traversal (BFS/DFS)
 13. Simulation + visualization
-14. 
+14. Memoization
 15. 
 16. 
 17. 
