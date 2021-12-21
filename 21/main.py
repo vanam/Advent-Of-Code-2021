@@ -34,7 +34,7 @@ END_SCORE = 21
 MEMO = {}
 
 
-def turn(i, position, score):
+def turn(position, score):
     if (position, score) in MEMO:
         return MEMO[(position, score)]
 
@@ -67,7 +67,7 @@ def turn(i, position, score):
                                 continue
                             else:
                                 # next turn
-                                tmp_res = turn(i + 1, (p1p, p2p), (p1s, p2s))
+                                tmp_res = turn((p1p, p2p), (p1s, p2s))
                                 result[0] += tmp_res[0]
                                 result[1] += tmp_res[1]
 
@@ -80,5 +80,5 @@ with open(FILE) as f:
     p1 = int(f.readline().strip().split(': ')[1])
     p2 = int(f.readline().strip().split(': ')[1])
 
-    res = turn(0, (p1, p2), (0, 0))
+    res = turn((p1, p2), (0, 0))
     print(max(res))
