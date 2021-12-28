@@ -82,3 +82,43 @@ with open(FILE) as f:
 
     res = turn((p1, p2), (0, 0))
     print(max(res))
+
+# 2. part - optimized
+END_SCORE = 21
+MEMO = {}
+
+
+def turn(p1, p2, s1, s2):
+    if (p1, p2, s1, s2) in MEMO:
+        return MEMO[(p1, p2, s1, s2)]
+
+    result = [0, 0]
+    # try all rolls for player 1
+    for p1d1 in range(1, 4):
+        for p1d2 in range(1, 4):
+            for p1d3 in range(1, 4):
+                p1roll = p1d1 + p1d2 + p1d3
+                p1p = (p1 + p1roll - 1) % 10 + 1
+                p1s = s1 + p1p
+
+                # check if player 1 wins
+                if p1s >= END_SCORE:
+                    result[0] += 1
+                    continue
+
+                # next turn (swap p1 with p2)
+                tmp_res = turn(p2, p1p, s2, p1s)
+                result[1] += tmp_res[0]
+                result[0] += tmp_res[1]
+
+    MEMO[(p1, p2, s1, s2)] = tuple(result)
+
+    return result
+
+
+with open(FILE) as f:
+    p1 = int(f.readline().strip().split(': ')[1])
+    p2 = int(f.readline().strip().split(': ')[1])
+
+    res = turn(p1, p2, 0, 0)
+    print(max(res))
