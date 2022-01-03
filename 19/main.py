@@ -1,11 +1,10 @@
 # https://adventofcode.com/2021/day/19
 
 import math
-import re
+from collections import defaultdict
 from math import sin, cos
-import numpy as np
 
-from collections import Counter, defaultdict
+import numpy as np
 
 FILE = 'input.txt'
 # FILE = 'input-small.txt'
@@ -57,8 +56,6 @@ with open(FILE) as f:
         beacons.append(np.array([list(map(int, line.strip().split(',')))], dtype=int))
     sensors.append(beacons)
 
-    # print(sensors)
-
     # Generate all possible scanner orientations
     # In total, each scanner could be in any of 24 different orientations:
     # facing positive or negative x, y, or z, and considering any of four directions "up" from that facing.
@@ -75,8 +72,8 @@ with open(FILE) as f:
 
     # as if scanner 0 is at (0,0,0)
     beacons = set([tuple(b[0]) for b in sensors[0]])
-    sensor_position = {0: np.array([[0, 0, 0]])}
-    sensor_rotation = {0: np.eye(3, dtype=int)}
+    sensor_positions = {0: np.array([[0, 0, 0]])}
+    sensor_rotations = {0: np.eye(3, dtype=int)}
 
     # precompute all rotations for all sensors
     rotated_sensors = defaultdict(dict)
@@ -95,108 +92,71 @@ with open(FILE) as f:
         s1 = sensors[i]
         processed_sensors.add(i)
 
-        s1_set = set()
-        for b1 in s1:
-            s1_set.add(tuple(b1[0]))
-
         # try other unprocessed sensors
         for j in range(len(sensors)):
             if j in processed_sensors or j in sensors2process:
                 continue
 
-            s2 = sensors[j]
-
             # try matching in every rotation
-            print("searching ", i, j)
+            # print("Searching", i, j)
             for ir, r in enumerate(rotations):
-                # s3 = [r.dot(b.T) for b in s2]
                 s3 = rotated_sensors[j][ir]
+
+                # vote for sensor position
+                sensor_position_vote = defaultdict(int)
 
                 # try mapping b2 to every b1
                 matched_translation = None
-                for ib2tc, b2_translation_candidate in enumerate(s3):
-                    for ib1tc, b1_translation_candidate in enumerate(s1):
+                for b2_translation_candidate in s3:
+                    for b1_translation_candidate in s1:
                         translation = np.subtract(b2_translation_candidate.T, b1_translation_candidate)
-                        # print("transl ", translation, b2_translation_candidate.T, b1_translation_candidate)
+                        sensor_position_vote[tuple(translation[0])] += 1
 
-                        pos1 = sensor_position[i]
-                        rot1 = sensor_rotation[i]
+                for translation, cnt in sensor_position_vote.items():
+                    if cnt >= OVERLAP:
+                        # print("Match found, overlap size:", cnt)
+                        translation = np.array(translation)
+
+                        pos1 = sensor_positions[i]
+                        rot1 = sensor_rotations[i]
 
                         pos2 = np.subtract(pos1, rot1.dot(translation.T).T)
                         rot2 = rot1.dot(r)
 
-                        diff = np.abs(np.subtract(pos1, pos2))
-                        if diff[0][0] > 2*RANGE or diff[0][1] > 2*RANGE or diff[0][2] > 2*RANGE:
-                        # if diff[0][0] > RANGE and diff[0][1] > RANGE and diff[0][2] > RANGE:
-                            # print("out of range", pos1, pos2, diff)
-                            continue
+                        sensors2process.add(j)
+                        matched_translation = translation
+                        sensor_pairs.append((i, j, r, translation))
 
-                        # sensor_position[j] = pos2
-
-
-                        s3_set = set()
-                        for b2 in s3:
-                            # b2t = np.eye(3, dtype=int)
-                            b2t = np.subtract(b2.T, translation)
-                            # print(tuple(b2t[0]))
-                            s3_set.add(tuple(b2t[0]))
-
-                        intersection = s1_set.intersection(s3_set)
-                        if len(intersection) >= OVERLAP:
-                            print("match found, overlap ", len(intersection))
-                            sensors2process.add(j)
-                            matched_translation = translation
-                            sensor_pairs.append((i, j, r, translation))
-
-                            sensor_position[j] = pos2
-                            sensor_rotation[j] = rot2
-                            break
-
-                        if len(s1) - ib1tc < OVERLAP:
-                            # print("2 shortcut", len(s1), ib1tc, len(s1) - ib1tc, OVERLAP)
-                            break
-
-                    if matched_translation is not None:
-                        break
-
-                    if len(s3) - ib2tc < OVERLAP:
-                        # print("shortcut", len(s3), ib2tc, len(s3) - ib2tc, OVERLAP)
-                        break
+                        sensor_positions[j] = pos2
+                        sensor_rotations[j] = rot2
 
                 if matched_translation is not None:
                     break
 
-    print(sensor_pairs)
-
+    # Reconstruct final beacon positions
+    # print(sensor_pairs)
     for i, j, r, t in sensor_pairs:
-        pos1 = sensor_position[i]
-        rot1 = sensor_rotation[i]
-
-        pos2 = np.subtract(pos1, rot1.dot(t.T).T)
-        sensor_position[j] = pos2
-
-        rot2 = rot1.dot(r)
-        sensor_rotation[j] = rot2
+        pos2 = sensor_positions[j]
+        rot2 = sensor_rotations[j]
 
         for b in sensors[j]:
             bt = np.add(pos2, rot2.dot(b.T).T)
             beacons.add(tuple(bt[0]))
 
+    # Print beacons
     # for b in beacons:
     #     print("{},{},{}".format(b[0], b[1], b[2]))
 
-    print(sensor_position)
+    # Print sensor positions
+    # print(sensor_position)
     print(len(beacons))  # 1. part
-
-    max_manhattan_distance = 0
-
 
     def manhattan_distance(sp1, sp2):
         return np.sum(np.abs(np.subtract(sp1, sp2)))
 
-
-    for i in range(len(sensor_position)):
-        for j in range(i + 1, len(sensor_position)):
-            max_manhattan_distance = max(max_manhattan_distance, manhattan_distance(sensor_position[i], sensor_position[j]))
+    max_manhattan_distance = 0
+    for i in range(len(sensor_positions)):
+        for j in range(i + 1, len(sensor_positions)):
+            max_manhattan_distance = max(max_manhattan_distance, manhattan_distance(sensor_positions[i], sensor_positions[j]))
 
     print(max_manhattan_distance)  # 2. part
